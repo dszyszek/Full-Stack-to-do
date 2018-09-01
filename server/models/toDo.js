@@ -19,4 +19,4 @@ let toDo = mongoose.model('toDo', {
 
 module.exports = {
     toDo
-}
+};
