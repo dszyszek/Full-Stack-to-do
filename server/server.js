@@ -8,7 +8,7 @@ let {user} = require('./models/user.js');
 
 
 let app = express();
-let port = process.env.port || 3000;
+let port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
@@ -59,6 +59,7 @@ app.get('/todos/:id', (req, res) => {
         res.status(404).send();
         console.log('ID is invalid!');
     }
+
     toDo.findById(id).then((docs) => {
         if (!docs) {
             console.log('ID not found');
