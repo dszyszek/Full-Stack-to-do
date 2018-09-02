@@ -42,6 +42,7 @@ app.post('/users', (req, res) => {
         });
 });
 
+
 app.get('/todos', (req, res) => {
 
     toDo.find().then((todos) => {
@@ -69,6 +70,31 @@ app.get('/todos/:id', (req, res) => {
         res.send({docs});
         console.log('To-do', docs);
     }).catch((err) => res.status(400).send());
+
+});
+
+app.delete('/todos/:id', (req, res) => {
+
+    let id = req.params.id;
+
+    if (!ObjectID.isValid(id)) {
+        res.status(404).send();
+        console.log('ID not valid!');
+    }
+
+    toDo.findByIdAndRemove(id).then((doc) => {
+        if (!doc) {
+            console.log('ID not found');
+           return res.status(404).send(); 
+        }
+        
+        res.status(200).send(doc);
+        console.log('Successfully deleted to-do', doc);
+
+    }).catch( () => {
+        console.log('Sth went wrong');
+        res.status(400).send()
+    });
 
 });
 
