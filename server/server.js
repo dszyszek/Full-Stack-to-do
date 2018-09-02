@@ -29,6 +29,18 @@ app.post('/todos', (req, res) => {
 
 });
 
+app.post('/users', (req, res) => {
+        let usr = new user({
+            email: req.body.email
+        });
+
+        usr.save().then((docs) => {
+            res.send(docs);
+        }).catch((err) => {
+            res.status(400).send(err);
+        });
+});
+
 app.get('/todos', (req, res) => {
 
     toDo.find().then((todos) => {
