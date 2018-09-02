@@ -112,3 +112,49 @@ it('Should return 404 fo non object ids', (done) => {
 })
     
 });
+
+
+describe('DELETE', () => {
+
+    it('Should remove a to-do', (done) => {
+        let hexID = testToDos[1]._id.toHexString();
+
+        request(app)
+        .delete(`/todos/${hexID}`)
+        .expect(200)
+        .expect((res) => {
+            expect(res.body.doc._id).toBe(hexID);
+        })
+        .end((err ,res) => {
+            if (err) {
+                return done(err);
+            }
+
+            toDo.findById(hexID).then((todos) => {
+                expect(todos).toBeFalsy();
+                done();
+            }).catch(err => done(err));
+        })
+    });
+
+     it('Should return 404 if to-do not found', (done) => {
+        request(app)
+        .delete(`/todos/1233`)
+        .expect(404)
+        .expect((res) => {
+            expect(res.body).toEqual({})
+         })
+        .end(done);
+     });
+
+     it('Should return 404 if object id not valid', (done) => {
+        request(app)
+        .delete(`/todos/1233`)
+        .expect(404)
+        .expect((res) => {
+            expect(res.body).toEqual({})
+         })
+        .end(done);
+     });
+
+});
