@@ -2,7 +2,9 @@ const {MongoClient, ObjectID} = require('mongodb');
 const {argv} = require('yargs');
 
 if (argv.id) {
-        MongoClient.connect('mongodb://localhost:27017/to-do-app', (err, db) => {
+        let database = process.env.MONGODB_URI || 'mongodb://localhost:27017/to-do-app'
+
+        MongoClient.connect(database, (err, db) => {
         if (err) {
             return console.log('Cannot connect to the database');
         }
