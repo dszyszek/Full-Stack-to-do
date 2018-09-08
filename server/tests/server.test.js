@@ -11,7 +11,9 @@ let testToDos = [{
     text: 'Text1'
 }, {
     _id: new ObjectID(),
-    text: 'Text2'
+    text: 'Text2',
+    completed: true,
+    completedAt: 123
 }];
 
 beforeEach((done) => {
@@ -156,5 +158,58 @@ describe('DELETE', () => {
          })
         .end(done);
      });
+
+});
+
+describe('PATCH', () => {
+
+    it('Should upadte a to-do', (done) => {
+        let hexID = testToDos[0]._id.toHexString();
+        let text = 'Text here';
+        let completed = true;
+        let completedAt = new Date().getTime();
+
+        request(app)
+        .patch(`/todos/${hexID}`)
+        .send({text, completed, completedAt})
+        .expect(200)
+        .expect((res) => {
+            expect(res.body.todo.text).toBe(text);
+            expect(res.body.todo.completed).toBe(completed);
+            expect(typeof res.body.todo.completedAt).toBe('number');
+        })
+        .end((err) => {
+            if (err) {
+                return done(err);
+            }
+            done();
+        });
+    });
+
+    it('Should clear completedAt, when to-do is not completed', (done) => {
+        let hexID = testToDos[1]._id.toHexString();
+        let text = 'Text here2';
+        let completed = false;
+
+        request(app)
+        .patch(`/todos/${hexID}`)
+        .expect(200)
+        .send({text, completed})
+        .expect((res) => {
+            if (!res.body.todo.completed) {
+                expect(res.body.todo.text).toBe(text);
+                expect(res.body.todo.completedAt).toBeFalsy();
+            }
+        })
+        .end((err) => {
+            if (err) {
+                return done(err);
+            }
+            done();
+        });
+    });
+
+
+
 
 });
