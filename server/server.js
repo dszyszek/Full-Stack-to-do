@@ -10,7 +10,7 @@ const {ObjectID} = require('mongodb');
 let {mongoose} = require('./db/mongoose.js');
 let {toDo} = require('./models/toDo.js');
 let {user} = require('./models/user.js');
-
+const {authenticate} = require('./middleware/authenticate.js');
 
 let app = express();
 let port = process.env.PORT;
@@ -47,6 +47,11 @@ app.post('/users', (req, res) => {
         res.status(400).send(err);
     });
 }); 
+
+
+app.get('/users/me', authenticate, (req, res) => {
+    res.send(req.user);
+});
 
 app.get('/users', (req, res) => {
 
