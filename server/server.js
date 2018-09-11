@@ -37,11 +37,12 @@ app.post('/todos', (req, res) => {
 
 app.post('/users', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
-
     let usr = new user(body);
 
-    usr.save().then((docs) => {
-        res.send(docs);
+    usr.save().then(() => {
+        return usr.generateAuthToken();
+    }).then((token) => {
+        res.header('x-auth', token).send(usr);
     }).catch((err) => {
         res.status(400).send(err);
     });
