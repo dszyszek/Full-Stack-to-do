@@ -4,23 +4,11 @@ const {ObjectID} = require('mongodb');
 
 let {app} = require('./../server.js');
 let {toDo} = require('./../models/toDo.js');
+let {populateTodos, testToDos, populateUsers, users} = require('./seed/seed.js');
+let {user} = require('./../models/user.js');
 
-
-let testToDos = [{
-    _id: new ObjectID(),
-    text: 'Text1'
-}, {
-    _id: new ObjectID(),
-    text: 'Text2',
-    completed: true,
-    completedAt: 123
-}];
-
-beforeEach((done) => {
-    toDo.deleteMany({}).then(() => {
-        return toDo.insertMany(testToDos);
-    }).then(() => done());
-});
+beforeEach(populateUsers);
+beforeEach(populateTodos);
 
 describe('POST', () => {
     it('Should return a new to-do', (done) => {
@@ -211,4 +199,94 @@ describe('PATCH', () => {
 
 
     
+});
+
+
+describe('GET users/me', () => {
+    it('Should return users (authenticated)', (done) => {
+
+        request(app)
+        .get('/users/me')
+        .set('x-auth', users[0].tokens[0].token)
+        .expect(200)
+        .expect((res) => {
+            expect(res.body._id).toBe(users[0]._id.toHexString());
+            expect(res.body.email).toBe(users[0].email)
+        })
+        .end(done)
+        
+    });
+
+    it('Should return 401', (done) => {
+
+        request(app)
+        .get('/users/me')
+        .expect(401)
+        .expect((res) => {
+            expect(res.body).toEqual({});
+        })
+        .end(done);
+    });
+});
+
+describe('POST /users', () => {
+    it('Should create a user', (done) => {
+        let email = 'qwe@ex.org';
+        let password = '1qazxsw2';
+
+        request(app)
+        .post('/users')
+        .send({email, password})
+        .expect(200)
+        .expect((res) => {
+            expect(res.headers['x-auth']).toBeTruthy();
+            expect(res.body._id).toBeTruthy();
+            expect(res.body.email).toBe(email);
+        })
+        .end((err) => {
+            if (err) {
+                return done(err);
+            }
+
+            user.findOne({email}).then((user) => {
+                expect(user.password).not.toEqual(password);
+                expect(user).toBeTruthy();
+
+                done();
+            }).catch((err) => done(err));
+            
+        })
+    });
+
+
+    it('Should not create a user if email in use', (done) => {
+        let email = users[0].email;
+        let password = '1qazxsw2';
+
+        request(app)
+        .post('/users')
+        .send({email, password})
+        .expect(400)
+        .expect((res) => {
+            expect(res.body._id).toBeFalsy();
+        })
+        .end(done);
+
+
+    });
+
+
+    it('Should return validation errors if request invalid', (done) => {
+
+        let email = 'ljsdlfj';
+        let password = 'qwertyuiop';
+
+        request(app)
+        .post('/users')
+        .send({email, password})
+        .expect(400)
+        .end(done);
+       
+        
+    });
 });
