@@ -126,4 +126,4 @@ module.exports = {
     user
 };
 
-//let reg = /([A-Za-z0-9._-]+@+[A-Za-z0-9._-]+\.[A-Za-z])/ig
+//let reg = /([A-Za-z0-9._-]+@[A-Za-z0-9._-]+\.[A-Za-z]{2,3})/ig
