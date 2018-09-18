@@ -135,6 +135,22 @@ app.delete('/todos/:id', (req, res) => {
 
 });
 
+app.delete('/users/me/token', authenticate, (req, res) => {
+
+    // let id = req._id.toHexString();
+
+    // app.findByIdAndRemove(id).then((docs) => {
+    //     res.status(200).send(docs);
+    // }).catch((err) => res.status(404).send());
+
+    req.user.removeToken(req.token).then(() => {
+        res.status(200).send();
+    }).catch(() => {
+        res.status(200).send();
+    });
+
+});
+
 app.patch('/todos/:id', (req, res) => {
     let id = req.params.id;
     let body = _.pick(req.body, ['text', 'completed']);
