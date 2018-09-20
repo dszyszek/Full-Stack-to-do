@@ -23,8 +23,6 @@ app.post('/todos', authenticate , (req, res) => {
         let text = new toDo({
             text: req.body.text,
             _creator: req.user._id
-            // completed: req.body.completed,
-            // completedAt: req.body.completedAt
         });
 
         text.save().then((docs) => {
@@ -44,7 +42,7 @@ app.post('/users', (req, res) => {
     usr.save().then(() => {
         return usr.generateAuthToken();
     }).then((token) => {
-        res.header('x-auth', token).send(usr);
+        res.status(200).header('x-auth', token).send(usr);
     }).catch((err) => {
         res.status(400).send(err);
     });
