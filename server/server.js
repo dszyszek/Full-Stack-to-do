@@ -42,7 +42,7 @@ app.post('/users', (req, res) => {
     usr.save().then(() => {
         return usr.generateAuthToken();
     }).then((token) => {
-        res.status(200).header('x-auth', token).send(usr);
+        res.header('x-auth', token).send(usr);
     }).catch((err) => {
         console.log(err);
         res.status(400).send(err);
