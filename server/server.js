@@ -18,11 +18,6 @@ let port = process.env.PORT;
 
 app.use(bodyParser.json());
 
-app.use(function(req, res, next) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    return next();
-  });
-
 app.post('/todos', authenticate , (req, res) => {
  
         let text = new toDo({
@@ -49,6 +44,7 @@ app.post('/users', (req, res) => {
     }).then((token) => {
         res.header('x-auth', token).send(usr);
     }).catch((err) => {
+        console.log(err);
         res.status(400).send(err);
     });
 }); 
