@@ -1,17 +1,19 @@
 // url: https://arcane-falls-77781.herokuapp.com/todos/
 
-require('./config/config.js');
+ require('./config/config.js');
 
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
 
 let {mongoose} = require('./db/mongoose.js');
 let {toDo} = require('./models/toDo.js');
 let {user} = require('./models/user.js');
 const {authenticate} = require('./middleware/authenticate.js');
+
 
 let app = express();
 let port = process.env.PORT;
@@ -24,6 +26,7 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-auth");
     return next();
   });
+
 
 app.post('/todos', authenticate , (req, res) => {
  
@@ -42,34 +45,48 @@ app.post('/todos', authenticate , (req, res) => {
 
 });
 
-app.post('/users', (req, res) => {
-    let body = _.pick(req.body, ['email', 'password']);
-    let usr = new user(body);
+app.post('/users', async (req, res) => {
+   
+    try {
+        let body = _.pick(req.body, ['email', 'password']);
+        console.log(body);
+        let usr = new user(body);
+        
+        await fs.appendFile('./server/logs/log.log', JSON.stringify(body)+ '\n', (e) => {
+            if (e) {
+                console.log(e);
+            }
+            console.log('file was created');
+        });
 
-    usr.save().then(() => {
-        return usr.generateAuthToken();
-    }).then((token) => {
+        await usr.save();
+        const token = await usr.generateAuthToken();
         res.header('x-auth', token).send(usr);
-    }).catch((err) => {
+    } catch (err) {
+        console.log(err);
         res.status(400).send(err);
-    });
+    }
+
 }); 
 
-app.post('/users/login', (req, res) => {
-    let body = _.pick(req.body, ['email', 'password']);
-    let email = body.email;
-    let password = body.password;
+app.post('/users/login', async (req, res) => {
+    
+    try {
+        const body = _.pick(req.body, ['email', 'password']);
+        const usr = await user.findByCredentials(body.email, body.password);
+        const token = await usr.generateAuthToken();
 
-    user.findByCredentials(email, password).then((usr) => {
-        usr.generateAuthToken().then((token) => {
-            res.header('x-auth', token).send(usr);
-        })
-    }).catch((e) => {
+        res.header('x-auth', token).send(usr);
+
+    } catch (e) {
+        console.log(e, 'POST error');
         res.status(400).send();
-
-    })
+    }
 });
 
+// app.get('/', (req, res) => {
+//     res.send('../public/index.html');
+// });
 
 app.get('/users/me', authenticate, (req, res) => {
     res.send(req.user);
@@ -121,8 +138,7 @@ app.get('/todos/:id', authenticate, (req, res) => {
 
 });
 
-app.delete('/todos/:id', authenticate, (req, res) => {
-
+app.delete('/todos/:id', authenticate, async (req, res) => {
     let id = req.params.id;
 
     if (!ObjectID.isValid(id)) {
@@ -130,34 +146,36 @@ app.delete('/todos/:id', authenticate, (req, res) => {
         console.log('ID not valid!');
     }
 
-    toDo.findOneAndRemove({
-        _id: id,
-        _creator: req.user._id
-    }).then((doc) => {
+    try {
+        const doc = await toDo.findOneAndRemove({
+            _id: id,
+            _creator: req.user._id
+        });
+    
         if (!doc) {
             console.log('ID not found');
            return res.status(404).send(); 
         }
-        
+    
         res.status(200).send({doc});
         console.log('Successfully deleted to-do', doc);
-
-    }).catch( () => {
+    } catch (e) {
         console.log('Sth went wrong');
-        res.status(400).send()
-    });
-
+        res.status(400).send();
+    }
+    
 });
 
-app.delete('/users/me/token', authenticate, (req, res) => {
+app.delete('/users/me/token', authenticate, async (req, res) => {
 
-    req.user.removeToken(req.token).then(() => {
+    try{
+        await req.user.removeToken(req.token)
         res.status(200).send(user);
-    }).catch(() => {
-        res.status(200).send();
-    });
-
+    } catch(e) {
+        res.status(400).send();
+    }  
 });
+
 
 app.patch('/todos/:id', authenticate, (req, res) => {
     let id = req.params.id;
