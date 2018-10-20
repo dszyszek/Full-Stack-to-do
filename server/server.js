@@ -84,10 +84,6 @@ app.post('/users/login', async (req, res) => {
     }
 });
 
-// app.get('/', (req, res) => {
-//     res.send('../public/index.html');
-// });
-
 app.get('/users/me', authenticate, (req, res) => {
     res.send(req.user);
 });

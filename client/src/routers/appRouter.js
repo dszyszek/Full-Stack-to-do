@@ -4,6 +4,7 @@ import {BrowserRouter, Route, NavLink, Switch} from 'react-router-dom';
 import Index from '../components/index';
 import Login from '../components/Login';
 import NotFound from '../components/NotFound';
+import SignUp from '../components/SignUp';
 
 const AppRouter = () => {
     return (
@@ -12,6 +13,7 @@ const AppRouter = () => {
                 <Switch>
                     <Route path='/' component={Index} exact={true} />
                     <Route path='/login' component={Login}/>
+                    <Route path='/signup' component={SignUp}/>
                     <Route component={NotFound} />
                 </Switch>
 

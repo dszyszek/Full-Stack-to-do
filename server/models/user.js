@@ -101,9 +101,7 @@ userSchema.statics.findByToken = function (token) {
   userSchema.statics.findByCredentials = function (email, password) {
 
         let user = this;
-       //console.log(email, password);
         return user.findOne({email}).then((usr) => {
-            console.log(usr, 'usr');
             if (!usr) {
                 return Promise.reject();
             }

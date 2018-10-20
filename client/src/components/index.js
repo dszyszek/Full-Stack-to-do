@@ -9,14 +9,14 @@ class Index extends React.Component {
 
                 <div>                           {/* Bar */}
                     
-                    <button>Sing up</button>
+                    <NavLink to='/signup'>Sign up</NavLink> 
                     <NavLink to='/login'>Log in</NavLink>
                     
                 </div>
 
                 <div>                           {/* Content */}
                     <h1>Welcome to my To-do App!</h1>
-                    <h3>Please log in or sing up to proceed</h3>
+                    <h3>Please log in or sign up to proceed</h3>
 
                 </div>
 

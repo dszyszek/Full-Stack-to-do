@@ -1,4 +1,5 @@
 import React from 'react';
+import {NavLink} from 'react-router-dom';
 
 const handleForm = async (e) => {
     e.preventDefault();
@@ -14,7 +15,8 @@ const handleForm = async (e) => {
 
 };
 
-const processRequest = async (docs) => {
+
+const processRequest = (docs) => {
 
     const post = fetch( 'http://localhost:3000/users/login', {
         method: 'post',
@@ -28,6 +30,7 @@ const processRequest = async (docs) => {
                  document.write('Invalid credentials');
                  return;
             } 
+            console.log(res.headers);
            return res.json();
         })
         .then(res => { 
@@ -42,12 +45,13 @@ const processRequest = async (docs) => {
 const Login = () => {
     return (
         <div>
-            { /*<h1>Please log in</h1> */}
+            <h1>Please log in</h1>
             <form onSubmit={handleForm}>
                 Email: <input type='text' className='emailInput' />
                 Password: <input type='password' className='passwordInput' />  
                 <button>Log in</button>
             </form>
+            <NavLink to='/'>Go back</NavLink>
         </div>
     );
 };
