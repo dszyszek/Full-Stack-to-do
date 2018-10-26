@@ -102,6 +102,7 @@ userSchema.statics.findByToken = function (token) {
 
         let user = this;
         return user.findOne({email}).then((usr) => {
+
             if (!usr) {
                 return Promise.reject();
             }

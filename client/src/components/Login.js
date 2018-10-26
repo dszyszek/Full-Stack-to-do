@@ -1,8 +1,9 @@
 import React from 'react';
-import {NavLink} from 'react-router-dom';
+import {NavLink, Link} from 'react-router-dom';
+import GoBack from './GoBack'
 
 const handleForm = async (e) => {
-    e.preventDefault();
+    //e.preventDefault();
     console.log('send');
 
 
@@ -11,17 +12,22 @@ const handleForm = async (e) => {
         password: document.querySelector('.passwordInput').value
     };
 
-    processRequest(data);
+    const token = await processRequest(data);
 
+    const storageToken = JSON.stringify(token);
+    localStorage.setItem('token', storageToken);
+    console.log(token);
 };
 
 
-const processRequest = (docs) => {
+const processRequest = async (docs) => {
 
-    const post = fetch( 'http://localhost:3000/users/login', {
+    console.log('inProcess');
+    const post = await fetch( 'http://localhost:3000/users/login', {
         method: 'post',
         headers: {
-                "Content-type": "application/json"
+                "Content-type": "application/json",
+                "Accept": "application/json"
                         },
         body: JSON.stringify(docs)
         })
@@ -30,32 +36,51 @@ const processRequest = (docs) => {
                  document.write('Invalid credentials');
                  return;
             } 
-            console.log(res.headers);
+
            return res.json();
         })
         .then(res => { 
             if (!res) return;
 
-           return document.write(JSON.stringify(res, undefined, 2))})
+            return res
+        })
         .catch(e => console.log(e));
 
-    return post;
+        console.log(post);
+    return post[1]['x-auth'];
 };
 
-const Login = () => {
-    return (
-        <div>
-            <h1>Please log in</h1>
-            <form onSubmit={handleForm}>
-                Email: <input type='text' className='emailInput' />
-                Password: <input type='password' className='passwordInput' />  
-                <button>Log in</button>
-            </form>
-            <NavLink to='/'>Go back</NavLink>
-        </div>
-    );
+class Login extends React.Component {
+
+    componentDidMount = () => {
+                const oldStorage = localStorage.getItem('token');
+
+                 if (oldStorage) {
+                    localStorage.removeItem('token');
+                }
+    };
+
+    render() {
+        return (
+            <div>
+                <h1>Please log in</h1>
+                    <form>
+                        Email: <input type='text' className='emailInput'  />
+                        Password: <input type='password' className='passwordInput' />  
+
+                        <Link to='/users/me'>
+                            <button onClick={handleForm}>Log in</button>
+                        </Link>
+
+                    </form>
+                <GoBack />
+            </div>
+        );
+    }
+
 };
 
 export {
-    Login as default
+    Login as default,
+    handleForm
 };

@@ -9,6 +9,7 @@ const {ObjectID} = require('mongodb');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
 
+
 let {mongoose} = require('./db/mongoose.js');
 let {toDo} = require('./models/toDo.js');
 let {user} = require('./models/user.js');
@@ -18,13 +19,14 @@ const {authenticate} = require('./middleware/authenticate.js');
 let app = express();
 let port = process.env.PORT;
 
+
 app.use(bodyParser.json());
 
 app.use(function(req, res, next) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-auth");
-    return next();
+    next();
   });
 
 
@@ -61,7 +63,7 @@ app.post('/users', async (req, res) => {
 
         await usr.save();
         const token = await usr.generateAuthToken();
-        res.header('x-auth', token).send(usr);
+        res.setHeader('x-auth', token).send(usr);
     } catch (err) {
         console.log(err);
         res.status(400).send(err);
@@ -70,14 +72,17 @@ app.post('/users', async (req, res) => {
 }); 
 
 app.post('/users/login', async (req, res) => {
+
     
     try {
         const body = _.pick(req.body, ['email', 'password']);
         const usr = await user.findByCredentials(body.email, body.password);
         const token = await usr.generateAuthToken();
 
-        res.header('x-auth', token).send(usr);
+        //res.header('x-auth', token).send(usr);
 
+        res.header('x-auth', token).send([usr, {'x-auth': token}]);
+        
     } catch (e) {
         console.log(e, 'POST error');
         res.status(400).send();
